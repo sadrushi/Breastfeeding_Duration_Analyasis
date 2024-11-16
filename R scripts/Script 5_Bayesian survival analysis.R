@@ -133,15 +133,11 @@ loo_compare(loo_1, loo_2, loo_3)
 
 ## Setting priors
 
-# Use the estimated coefficients as the means for the priors
-informative_means.F <- Priors.data$beta.Fixed
-informative_sds.F <- Priors.data$sd.beta.Fixed
+# Setting priors from the Random-effects model
 
 informative_means.R <- Priors.data$beta.Random
 informative_sds.R <- Priors.data$sd.beta.Random
 
-# Create the priors
-informative_priors.F <- normal(location = informative_means.F, scale = informative_sds.F)
 informative_priors.R <- normal(location = informative_means.R, scale = informative_sds.R)
 
 # ------------------------------------------------------------------------------
@@ -150,47 +146,7 @@ informative_priors.R <- normal(location = informative_means.R, scale = informati
 
 # Gompertz model
 
-# with waek priors
-mod_gompertz_final1 <- stan_surv(
-  formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
-    Maternal.employment+Wealth.status+Delivery.mode+
-    Child.gender+Birth.order+Child.birth.weight+
-    Age.at.first.feeding+Parity,
-  data = Baysurv.data,
-  basehaz = "gompertz",
-  prior_intercept = normal(0,1),
-  chains = 4,
-  cores = 2,
-  iter = 2*5000,
-  seed = 345)
-
-# Prior summary
-prior_summary(mod_gompertz_final1)
-# Summary of fitted model: Posterior summary statistics
-tidy(mod_gompertz_final1, conf.int = TRUE, conf.level = 0.95)
-
-
-mod_gompertz_final2 <- stan_surv(
-  formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
-    Maternal.employment+Wealth.status+Delivery.mode+
-    Child.gender+Birth.order+Child.birth.weight+
-    Age.at.first.feeding+Parity,
-  data = Baysurv.data,
-  basehaz = "gompertz",
-  prior = informative_priors.F,
-  prior_intercept = normal(0,1),
-  chains = 4,
-  cores = 2,
-  iter = 2*5000,
-  seed = 345)
-
-# Prior summary
-prior_summary(mod_gompertz_final2)
-# Summary of fitted model: Posterior summary statistics
-tidy(mod_gompertz_final2, conf.int = TRUE, conf.level = 0.95)
-
-
-mod_gompertz_final3 <- stan_surv(
+mod_gompertz_final <- stan_surv(
   formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
     Maternal.employment+Wealth.status+Delivery.mode+
     Child.gender+Birth.order+Child.birth.weight+
@@ -205,163 +161,19 @@ mod_gompertz_final3 <- stan_surv(
   seed = 345)
 
 # Prior summary
-prior_summary(mod_gompertz_final3)
-# Summary of fitted model: Posterior summary statistics
-tidy(mod_gompertz_final3, conf.int = TRUE, conf.level = 0.95)
+prior_summary(mod_gompertz_final)
 
-mod_gompertz_final4 <- stan_surv(
-  formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
-    Maternal.employment+Wealth.status+Delivery.mode+
-    Child.gender+Birth.order+Child.birth.weight+
-    Age.at.first.feeding+Parity,
-  data = Baysurv.data,
-  basehaz = "gompertz",
-  prior_PD = TRUE,
-  prior = informative_priors.F,
-  prior_intercept = normal(0,1),
-  chains = 4,
-  cores = 2,
-  iter = 2*5000,
-  seed = 345)
+# Summary of fitted model: with estimates
+BaySurv.outcome.estimate <- tidy(mod_gompertz_final, conf.int = TRUE, conf.level = 0.95)
 
-# Prior summary
-prior_summary(mod_gompertz_final4)
-# Summary of fitted model: Posterior summary statistics
-tidy(mod_gompertz_final4, conf.int = TRUE, conf.level = 0.95)
+# Summary of fitted model: with hazard ratios
+BaySurv.outcome.HR <- tidy(mod_gompertz_final, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95)
 
-mod_gompertz_final5 <- stan_surv(
-  formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
-    Maternal.employment+Wealth.status+Delivery.mode+
-    Child.gender+Birth.order+Child.birth.weight+
-    Age.at.first.feeding+Parity,
-  data = Baysurv.data,
-  basehaz = "gompertz",
-  prior_PD = TRUE,
-  prior = informative_priors.R,
-  prior_intercept = normal(0,1),
-  chains = 4,
-  cores = 2,
-  iter = 2*5000,
-  seed = 345)
+#BaySurv.outcome <- merge(BaySurv.outcome.estimate, BaySurv.outcome.HR, by = "term")
+#write_xlsx(BaySurv.outcome, "Datasets/Bayesian model outcome final.xlsx")
 
-# Prior summary
-prior_summary(mod_gompertz_final5)
-# Summary of fitted model: Posterior summary statistics
-tidy(mod_gompertz_final5, conf.int = TRUE, conf.level = 0.95)
+print(mod_gompertz_final, digits = 3)
 
-##############################################################################
-# Compare models 
-
-loo_1 <- loo(mod_gompertz_final1)
-loo_2 <- loo(mod_gompertz_final2)
-loo_3 <- loo(mod_gompertz_final3)
-loo_4 <- loo(mod_gompertz_final4)
-loo_5 <- loo(mod_gompertz_final5)
-
-loo_compare(loo_1, loo_2, loo_3, loo_4, loo_5)
-loo_compare(loo_2, loo_3)
-
-waic1 <- waic(mod_gompertz_final2)
-waic2 <- waic(mod_gompertz_final3)
-
-# Compare WAIC values
-loo_compare(waic1, waic2)
-
-
-##########################################################################
-
-# Posterior summary graph
-x <- posterior_interval(mod_gompertz, prob = 0.95, 
-                        pars = c("(Intercept)", 
-                                 "Age.at.delivery18-30", 
-                                 "Maternal.educational.levelUp to ordinary level", 
-                                 "Maternal.educational.levelUp to advanced level", 
-                                 "Maternal.employmentUnemployed",
-                                 "Wealth.statusLower", 
-                                 "Wealth.statusMiddle", 
-                                 "Delivery.modeNormal", 
-                                 "Child.genderMale", 
-                                 "Birth.orderSecond",
-                                 "Birth.orderThird or above", 
-                                 "Child.birth.weightNormal", 
-                                 "Age.at.first.feeding< 6 months", 
-                                 "Parity3-4 children"))
-round(x, 4)
-
-# ------------------------------------------------------------------------------
-
-# Plot of CI
-mcmc_intervals(mod_gompertz) + vline_at(0)
-
-
-mod_gompertz.prior <- stan_surv(
-  formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
-    Maternal.employment+Wealth.status+Delivery.mode+
-    Child.gender+Birth.order+Child.birth.weight+
-    Age.at.first.feeding+Parity,
-  data = Baysurv.data,
-  basehaz = "gompertz",
-  prior = informative_priors,
-  prior_intercept = normal(0,1),
-  prior_PD = TRUE,
-  chains = 4,
-  cores = 2,
-  iter = 2*5000,
-  seed = 345)
-
-# Plot of prior and posterior values
-plot_grid(
-  bayesplot_grid(mcmc_intervals(mod_gompertz.prior),
-                 mcmc_intervals(mod_gompertz),
-                 titles = c("Prior", "Posterior"),
-                 grid_args = list(nrow = 2)),
-  
-  bayesplot_grid(mcmc_hist(mod_gompertz.prior),
-                 mcmc_hist(mod_gompertz),
-                 titles = c("Prior", "Posterior"),
-                 grid_args = list(nrow = 2)),
-  
-  ncol = 2
-)
-
-prior_pred_samples <- posterior_survfit(mod_gompertz, type = "surv")
-
-
-observed_times <- Baysurv.data$BF.time
-prior_pred_times <- round(prior_pred_samples$time, 0)
-
-ggplot() +
-  geom_density(aes(x = observed_times), color = 'blue') +
-  geom_density(aes(x = prior_pred_times), color = 'red', alpha = 0.5) +
-  labs(title = "Prior Predictive Check",
-       x = "Survival Time",
-       y = "Density") +
-  theme_minimal()
-
-
-posterior_preds <- posterior_survfit(mod_gompertz)
-prior_preds <- posterior_survfit(mod_gompertz.prior)
-
-# Set up the plotting area
-par(mfrow = c(3, 1))
-
-# Plot Kaplan-Meier curves for posterior predictives
-plot(survfit(Surv(BF.time, Censoring.status) ~ 1, data = posterior_preds),
-     main = "Posterior")
-
-# Plot Kaplan-Meier curves for prior predictives
-plot(survfit(Surv(BF.time, Censoring.status) ~ 1, data = prior_preds),
-     main = "Prior")
-
-# Plot Kaplan-Meier curves for observed data
-plot(survfit(Surv(BF.time, Censoring.status) ~ 1, data = Baysurv.data),
-     main = "Observed")
-
-posterior_vs_prior(mod_gompertz)
-
-ggplot() +
-  geom_density(aes(x = posterior_preds$median), color = 'blue') +
-  geom_density(aes(x = prior_preds$median), color = 'red', alpha = 0.5)
 
 # ------------------------------------------------------------------------------
 
@@ -369,7 +181,7 @@ ggplot() +
 
 # trace plots
 
-mcmc_trace(mod_gompertz, size = 0.1, 
+mcmc_trace(mod_gompertz_final, size = 0.1, 
            pars = c("(Intercept)", 
                     "Age.at.delivery18-30")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -379,7 +191,7 @@ mcmc_trace(mod_gompertz, size = 0.1,
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_trace(mod_gompertz, size = 0.1, 
+mcmc_trace(mod_gompertz_final, size = 0.1, 
            pars = c("Maternal.educational.levelUp to ordinary level", 
                     "Maternal.educational.levelUp to advanced level")) +  
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -388,7 +200,7 @@ mcmc_trace(mod_gompertz, size = 0.1,
                  legend.title = element_text(size = 13.5),
                  strip.text = element_text(size = 14, color = "black"))
 
-mcmc_trace(mod_gompertz, size = 0.1, 
+mcmc_trace(mod_gompertz_final, size = 0.1, 
            pars = c("Maternal.employmentUnemployed",
                     "Wealth.statusLower")) +  
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", 
@@ -399,7 +211,7 @@ mcmc_trace(mod_gompertz, size = 0.1,
 
 
 
-mcmc_trace(mod_gompertz, size = 0.1, pars = c("Wealth.statusMiddle", 
+mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Wealth.statusMiddle", 
                                               "Delivery.modeNormal")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
@@ -408,7 +220,7 @@ mcmc_trace(mod_gompertz, size = 0.1, pars = c("Wealth.statusMiddle",
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_trace(mod_gompertz, size = 0.1, pars = c("Child.genderMale", 
+mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Child.genderMale", 
                                               "Birth.orderSecond")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
@@ -417,7 +229,7 @@ mcmc_trace(mod_gompertz, size = 0.1, pars = c("Child.genderMale",
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_trace(mod_gompertz, size = 0.1, pars = c("Birth.orderThird or above", 
+mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Birth.orderThird or above", 
                                               "Child.birth.weightNormal")) +
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
@@ -426,7 +238,7 @@ mcmc_trace(mod_gompertz, size = 0.1, pars = c("Birth.orderThird or above",
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_trace(mod_gompertz, size = 0.1, pars = c("Age.at.first.feeding< 6 months", 
+mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Age.at.first.feeding< 6 months", 
                                               "Parity3-4 children")) +
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
@@ -438,7 +250,7 @@ mcmc_trace(mod_gompertz, size = 0.1, pars = c("Age.at.first.feeding< 6 months",
 
 # density plots
 
-mcmc_dens_overlay(mod_gompertz,  
+mcmc_dens_overlay(mod_gompertz_final,  
                   pars = c("(Intercept)", 
                            "Age.at.delivery18-30")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -447,7 +259,7 @@ mcmc_dens_overlay(mod_gompertz,
                  legend.title = element_text(size = 13.5),
                  strip.text = element_text(size = 14, color = "black"))
 
-mcmc_dens_overlay(mod_gompertz,  
+mcmc_dens_overlay(mod_gompertz_final,  
                   pars = c("Maternal.educational.levelUp to ordinary level", 
                            "Maternal.educational.levelUp to advanced level")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -457,7 +269,7 @@ mcmc_dens_overlay(mod_gompertz,
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_dens_overlay(mod_gompertz, 
+mcmc_dens_overlay(mod_gompertz_final, 
                   pars = c("Maternal.employmentUnemployed",
                            "Wealth.statusLower")) +  
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -466,7 +278,7 @@ mcmc_dens_overlay(mod_gompertz,
                  legend.title = element_text(size = 13.5),
                  strip.text = element_text(size = 14, color = "black"))
 
-mcmc_dens_overlay(mod_gompertz, 
+mcmc_dens_overlay(mod_gompertz_final, 
                   pars = c("Wealth.statusMiddle", 
                            "Delivery.modeNormal")) +  
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -475,7 +287,7 @@ mcmc_dens_overlay(mod_gompertz,
                  legend.title = element_text(size = 13.5),
                  strip.text = element_text(size = 14, color = "black"))
 
-mcmc_dens_overlay(mod_gompertz, 
+mcmc_dens_overlay(mod_gompertz_final, 
                   pars = c("Child.genderMale", 
                            "Birth.orderSecond")) +  
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
@@ -485,7 +297,7 @@ mcmc_dens_overlay(mod_gompertz,
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_dens_overlay(mod_gompertz, 
+mcmc_dens_overlay(mod_gompertz_final, 
                   pars = c("Birth.orderThird or above", 
                            "Child.birth.weightNormal"
                   )) +   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A",
@@ -496,7 +308,7 @@ mcmc_dens_overlay(mod_gompertz,
 
 
 
-mcmc_dens_overlay(mod_gompertz, pars = c("Age.at.first.feeding< 6 months", 
+mcmc_dens_overlay(mod_gompertz_final, pars = c("Age.at.first.feeding< 6 months", 
                                          "Parity3-4 children")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
@@ -509,37 +321,19 @@ mcmc_dens_overlay(mod_gompertz, pars = c("Age.at.first.feeding< 6 months",
 color_scheme_set(c("#800080", "#400040", "#bf7fbf", "#bf7fbf",  "#800080",
                    "#400040"))
 
-r <- rhat(mod_gompertz)
+r <- rhat(mod_gompertz_final)
 mcmc_rhat_hist(r) +
   ggplot2::theme(axis.text = element_text(size = 12, color = "black"),
-                 legend.title = element_text(size = 13.5),
-                 strip.text = element_text(size = 14, color = "black"))
+                 legend.title = element_text(size = 12),
+                 strip.text = element_text(size = 12, color = "black"))
 
 
 # Effective sample size
 color_scheme_set(c("#800080", "#400040", "#bf7fbf", "#bf7fbf",  "#800080",
                    "#400040"))
 
-n <- neff_ratio(mod_gompertz)
+n <- neff_ratio(mod_gompertz_final)
 mcmc_neff(n, size = 2) + yaxis_text(hjust = 1) + 
-  ggplot2::theme(axis.text = element_text(size = 13, color = "black"),
-                 legend.title = element_text(size = 14))
+  ggplot2::theme(axis.text = element_text(size = 12, color = "black"),
+                 legend.title = element_text(size = 12))
 
-
-r <- rhat(mod_gompertz)
-
-n <- neff_ratio(mod_gompertz)
-
-mcmc_rhat_hist(r) 
-
-mcmc_neff(n) + yaxis_text(hjust = 1)
-
-# Effective sample size ratio
-neff_ratio()
-# Rhat value
-rhat()
-# Trace plots of parallel chains
-mcmc_trace()
-mcmc_areas()
-# Density plots of parallel chains
-mcmc_dens_overlay()
