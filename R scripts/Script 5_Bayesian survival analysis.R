@@ -134,8 +134,8 @@ loo_compare(loo_1, loo_2, loo_3)
 
 # Setting priors from the Random-effects model
 
-informative_means.R <- Priors.data$beta.Fixed
-informative_sds.R <- Priors.data$sd.beta.Fixed
+informative_means.R <- Priors.data$beta.Random
+informative_sds.R <- Priors.data$sd.beta.Random
 
 informative_priors.R <- normal(location = informative_means.R, scale = informative_sds.R)
 

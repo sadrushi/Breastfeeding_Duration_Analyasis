@@ -12,7 +12,7 @@ Maternal_age <- read_excel("Datasets/Maternal age.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(AdjustedHR), lower = log(CILower), upper = log(CIHigher),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Maternal_age,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -28,7 +28,7 @@ Education.primary <- read_excel("Datasets/Education.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(Hazardratio), lower = log(CILower), upper = log(CIHigher),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Education.primary,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -42,7 +42,7 @@ Education.secondary <- read_excel("Datasets/Education.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Higher`),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Education.secondary,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -58,7 +58,7 @@ Employment <- read_excel("Datasets/Employment.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Higher`),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Employment,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -74,7 +74,7 @@ Delivery_mode <- read_excel("Datasets/Delivery mode.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(Hazardratio), lower = log(CILower), upper = log(CIHigher),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Delivery_mode,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -90,7 +90,7 @@ Wealth_status.poor <- read_excel("Datasets/Wealth status.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`Lower CI`), upper = log(`Higher CI`),  
-  sm = "HR", common=T, random=T,
+  sm = "HR", common=F, random=T,
   studlab = `Article No`, data = Wealth_status.poor,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -104,7 +104,7 @@ Wealth_status.middle <- read_excel("Datasets/Wealth status.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`Lower CI`), upper = log(`Higher CI`),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Wealth_status.middle,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -120,7 +120,7 @@ Child_s_Gender <- read_excel("Datasets/Child's Gender.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(Hazardratio), lower = log(CILower), upper = log(CIHigher),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Child_s_Gender,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -136,7 +136,7 @@ Birth_order.second <- read_excel("Datasets/Birth order.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Higher`),  
-  sm = "HR", common=T, random=T,
+  sm = "HR", common=F, random=T,
   studlab = `Article No`, data = Birth_order.second,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -150,7 +150,7 @@ Birth_order.third <- read_excel("Datasets/Birth order.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Higher`),  
-  sm = "HR", common=T, random=T,
+  sm = "HR", common=F, random=T,
   studlab = `Article No`, data = Birth_order.third,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -167,7 +167,7 @@ Birth_weight <- read_excel("Datasets/Birth weight.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(AdjustedHR), lower = log(`AdjustedCI L`), upper = log(`AdjustedCI H`),  
-  sm = "HR", common=T, random=T, 
+  sm = "HR", common=F, random=T, 
   studlab = `Article No`, data = Birth_weight,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
@@ -183,10 +183,11 @@ Age_at_feeding <- read_excel("Datasets/Age at feeding.xlsx",
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
   TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Upper`),  
-  sm = "HR", common=T, random=T,
+  sm = "HR", common=F, random=T,
   studlab = `Article No`, data = Age_at_feeding,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
 ) 
 
 summary(mR) 
+
