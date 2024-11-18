@@ -27,8 +27,7 @@ Baysurv.data <- Baysurv.data %>%
          Child.gender = factor(Child.gender, levels = c("Female","Male")),
          Birth.order = factor(Birth.order, levels = c("First","Second","Third or above")),
          Age.at.first.feeding = factor(Age.at.first.feeding, levels = c("< 6 months",">= 6 months")),
-         Child.birth.weight = factor(Child.birth.weight, levels = c("Low","Normal")),
-         Parity = factor(Parity, levels = c("1-2 children","3-4 children")))
+         Child.birth.weight = factor(Child.birth.weight, levels = c("Low","Normal")))
 
 # Defining reference levels
 Baysurv.data$Age.at.delivery <- relevel(Baysurv.data$Age.at.delivery, ref = "31-45")
@@ -40,7 +39,7 @@ Baysurv.data$Child.gender <- relevel(Baysurv.data$Child.gender,ref = "Female")
 Baysurv.data$Birth.order <- relevel(Baysurv.data$Birth.order,ref = "First")
 Baysurv.data$Age.at.first.feeding <- relevel(Baysurv.data$Age.at.first.feeding,ref = ">= 6 months")
 Baysurv.data$Child.birth.weight <- relevel(Baysurv.data$Child.birth.weight, ref = "Low")
-Baysurv.data$Parity <- relevel(Baysurv.data$Parity, ref = "1-2 children")
+
 
 ################################################################################
 ###################### Classical Cox PH Model #########################
@@ -53,7 +52,7 @@ surv.obj <- Surv(BF.time, Censoring.status)
 Clcox.fit <- coxph(surv.obj~Age.at.delivery+Maternal.educational.level+
                      Maternal.employment+Wealth.status+Delivery.mode+
                      Child.gender+Birth.order+Child.birth.weight+
-                     Age.at.first.feeding+Parity)
+                     Age.at.first.feeding)
 
 # Summary of fitted model
 summary(Clcox.fit)
@@ -135,8 +134,8 @@ loo_compare(loo_1, loo_2, loo_3)
 
 # Setting priors from the Random-effects model
 
-informative_means.R <- Priors.data$beta.Random
-informative_sds.R <- Priors.data$sd.beta.Random
+informative_means.R <- Priors.data$beta.Fixed
+informative_sds.R <- Priors.data$sd.beta.Fixed
 
 informative_priors.R <- normal(location = informative_means.R, scale = informative_sds.R)
 
@@ -146,11 +145,31 @@ informative_priors.R <- normal(location = informative_means.R, scale = informati
 
 # Gompertz model
 
+# conditioning on prior
+mod_gompertz_prior <- stan_surv(
+  formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
+    Maternal.employment+Wealth.status+Delivery.mode+
+    Child.gender+Birth.order+Child.birth.weight+
+    Age.at.first.feeding,
+  data = Baysurv.data,
+  basehaz = "gompertz",
+  prior_PD = TRUE,
+  prior = informative_priors.R,
+  prior_intercept = normal(0,1),
+  chains = 4,
+  cores = 2,
+  iter = 2*5000,
+  seed = 345)
+
+# model summary
+tidy(mod_gompertz_prior, conf.int = TRUE, conf.level = 0.95)
+
+# conditioning on prior + data
 mod_gompertz_final <- stan_surv(
   formula = Surv(BF.time, Censoring.status) ~ Age.at.delivery+Maternal.educational.level+
     Maternal.employment+Wealth.status+Delivery.mode+
     Child.gender+Birth.order+Child.birth.weight+
-    Age.at.first.feeding+Parity,
+    Age.at.first.feeding,
   data = Baysurv.data,
   basehaz = "gompertz",
   prior = informative_priors.R,
@@ -164,13 +183,10 @@ mod_gompertz_final <- stan_surv(
 prior_summary(mod_gompertz_final)
 
 # Summary of fitted model: with estimates
-BaySurv.outcome.estimate <- tidy(mod_gompertz_final, conf.int = TRUE, conf.level = 0.95)
+tidy(mod_gompertz_final, conf.int = TRUE, conf.level = 0.95)
 
 # Summary of fitted model: with hazard ratios
-BaySurv.outcome.HR <- tidy(mod_gompertz_final, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95)
-
-#BaySurv.outcome <- merge(BaySurv.outcome.estimate, BaySurv.outcome.HR, by = "term")
-#write_xlsx(BaySurv.outcome, "Datasets/Bayesian model outcome final.xlsx")
+tidy(mod_gompertz_final, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95)
 
 print(mod_gompertz_final, digits = 3)
 
@@ -238,8 +254,7 @@ mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Birth.orderThird or above",
                  strip.text = element_text(size = 14, color = "black"))
 
 
-mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Age.at.first.feeding< 6 months", 
-                                              "Parity3-4 children")) +
+mcmc_trace(mod_gompertz_final, size = 0.1, pars = c("Age.at.first.feeding< 6 months")) +
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
   ggplot2::theme(axis.text = element_text(size = 12, color = "black"),
@@ -308,8 +323,7 @@ mcmc_dens_overlay(mod_gompertz_final,
 
 
 
-mcmc_dens_overlay(mod_gompertz_final, pars = c("Age.at.first.feeding< 6 months", 
-                                         "Parity3-4 children")) + 
+mcmc_dens_overlay(mod_gompertz_final, pars = c("Age.at.first.feeding< 6 months")) + 
   ggplot2::scale_color_discrete(type = c("#3B0F70FF", "#E7298A", "#E6AB02", 
                                          "#1B9E77")) +
   ggplot2::theme(axis.text = element_text(size = 12, color = "black"),

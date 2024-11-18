@@ -20,13 +20,6 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 ###############################################################################
 
 Education.primary <- read_excel("Datasets/Education.xlsx", 
@@ -43,13 +36,6 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 Education.secondary <- read_excel("Datasets/Education.xlsx", 
                                   sheet = "Final data - secondary")
 
@@ -63,13 +49,6 @@ mR <- metagen(
 ) 
 
 summary(mR) 
-
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
 
 ###############################################################################
 
@@ -87,13 +66,6 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 ###############################################################################
 
 Delivery_mode <- read_excel("Datasets/Delivery mode.xlsx", 
@@ -109,13 +81,6 @@ mR <- metagen(
 ) 
 
 summary(mR) 
-
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
 
 ###############################################################################
 
@@ -133,13 +98,6 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 Wealth_status.middle <- read_excel("Datasets/Wealth status.xlsx", 
                                    sheet = "Final data - middle")
 
@@ -153,13 +111,6 @@ mR <- metagen(
 ) 
 
 summary(mR) 
-
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
 
 ###############################################################################
 
@@ -177,13 +128,6 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 ###############################################################################
 
 Birth_order.second <- read_excel("Datasets/Birth order.xlsx", 
@@ -200,13 +144,6 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 Birth_order.third <- read_excel("Datasets/Birth order.xlsx", 
                                 sheet = "Final data - third")
 
@@ -220,35 +157,6 @@ mR <- metagen(
 ) 
 
 summary(mR) 
-
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
-###############################################################################
-
-Age_at_feeding <- read_excel("Datasets/Age at feeding.xlsx", 
-                             sheet = "Final data")
-
-## run function metagen to get estimates using generic inverse variance method  
-mR <- metagen( 
-  TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Upper`),  
-  sm = "HR", common=T, random=T,
-  studlab = `Article No`, data = Age_at_feeding,
-  method.tau = "DL",   ## method to calculate Tau 
-  method.random.ci = "classic",  ## method to calculate estimator's CI 
-) 
-
-summary(mR) 
-
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
 
 
 ###############################################################################
@@ -267,31 +175,18 @@ mR <- metagen(
 
 summary(mR) 
 
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 
-
-
 ###############################################################################
 
-Parity <- read_excel("Datasets/Parity.xlsx", 
-                     sheet = "Final data")
+Age_at_feeding <- read_excel("Datasets/Age at feeding.xlsx", 
+                             sheet = "Final data")
 
 ## run function metagen to get estimates using generic inverse variance method  
 mR <- metagen( 
-  TE = log(`Adjusted HR`), lower = log(`AdjustedCI L`), upper = log(`AdjustedCI H`),  
-  sm = "HR", common=T, random=T, 
-  studlab = `Article No`, data = Parity,
+  TE = log(`Hazard ratio`), lower = log(`CI Lower`), upper = log(`CI Upper`),  
+  sm = "HR", common=T, random=T,
+  studlab = `Article No`, data = Age_at_feeding,
   method.tau = "DL",   ## method to calculate Tau 
   method.random.ci = "classic",  ## method to calculate estimator's CI 
 ) 
 
 summary(mR) 
-
-## Forest plot of the estimates   
-forest(mR) 
-
-## Funnel plot of the meta-analysis 
-funnel(mR) 

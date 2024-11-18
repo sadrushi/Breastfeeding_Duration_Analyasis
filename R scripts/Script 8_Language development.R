@@ -64,3 +64,4 @@ summary(full.language)
 x <- exp(cbind(OR = coef(full.language), confint(full.language, level = 0.9)))
 
 round(x, 3)
+

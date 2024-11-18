@@ -7,7 +7,7 @@ library(DescTools)
 library(readxl)
 
 # Importing dataset
-data <- read_excel("Datasets/Breastfeeding_Duration_Data.xlsx")
+data <- read_excel("Datasets/Breastfeeding Duration Data.xlsx")
 
 # Creating Survival Object
 attach(data)

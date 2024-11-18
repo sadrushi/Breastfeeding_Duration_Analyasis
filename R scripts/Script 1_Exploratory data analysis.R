@@ -5,7 +5,8 @@ library(DescTools)
 library(readxl)
 
 # Importing EDA_Data sets
-EDA_Data <- read_excel("Datasets/Breastfeeding related data.xlsx")
+EDA_Data <- read_excel("Datasets/Data for BF duration analysis.xlsx")
+
 
 #---------------------------------------------------------
 
@@ -44,10 +45,6 @@ round(prop.table(table(EDA_Data$Age.at.first.feeding))*100, digits = 1)
 # Child's birth weight
 table(EDA_Data$Child.birth.weight)
 round(prop.table(table(EDA_Data$Child.birth.weight))*100, digits = 1)
-
-# Parity
-table(EDA_Data$Parity)
-round(prop.table(table(EDA_Data$Parity))*100, digits = 1)
 
 # Child's age in years
 EDA_Data <- EDA_Data %>% mutate(Child.age.years = round(Child.age/12,1))
